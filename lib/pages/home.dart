@@ -38,10 +38,10 @@ class _HomeState extends State<Home> {
       ),
       body: PageView(
         children: [
-          MoreScreen(),
-          Search(),
-          Favorite(),
           HomeRooms(),
+          Favorite(),
+          Search(),
+          MoreScreen(),
         ],
         controller: pageController,
         onPageChanged: onPageChanged,
@@ -56,11 +56,19 @@ class _HomeState extends State<Home> {
 
        items: <BottomNavyBarItem>[
 
+
          BottomNavyBarItem(
              activeColor: Colors.pinkAccent.shade100,
              inactiveColor: Colors.black45,
-             title: Text('المزيد'),
-             icon: Icon(Icons.more_horiz,)
+             title: Text('الغرف'),
+             icon: Icon(Icons.home,)
+         ),
+
+         BottomNavyBarItem(
+             activeColor: Colors.pinkAccent.shade100,
+             inactiveColor: Colors.black45,
+             title: Text('المفضلة'),
+             icon: Icon(Icons.favorite,)
          ),
 
 
@@ -74,23 +82,10 @@ class _HomeState extends State<Home> {
          BottomNavyBarItem(
              activeColor: Colors.pinkAccent.shade100,
              inactiveColor: Colors.black45,
-             title: Text('المفضلة'),
-             icon: Icon(Icons.favorite,)
+             title: Text('المزيد'),
+             icon: Icon(Icons.more_horiz,)
          ),
 
-         BottomNavyBarItem(
-             activeColor: Colors.pinkAccent.shade100,
-             inactiveColor: Colors.black45,
-             title: Text('الغرف'),
-             icon: Icon(Icons.home,)
-         ),
-
-
-
-
-
-//          BottomNavigationBarItem(icon: Icon(Icons.home, size: 35,)),
-//          BottomNavigationBarItem(icon: Icon(Icons.settings, size: 35,)),
        ],
      ),
 

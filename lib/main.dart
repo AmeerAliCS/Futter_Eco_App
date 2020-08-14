@@ -1,11 +1,19 @@
 import 'package:eco_app/pages/home.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 
-
-void main() => runApp(MaterialApp(home: Home()));
+void main() => runApp(MaterialApp(
+    localizationsDelegates: [
+      // ... app-specific localization delegate[s] here
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      const Locale('ar', 'AE')
+    ],
+    home: Home()));
 
 
 
