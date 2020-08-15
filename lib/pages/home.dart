@@ -1,9 +1,12 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_app/pages/favorite.dart';
 import 'package:eco_app/pages/home_rooms.dart';
 import 'package:eco_app/pages/more_screen.dart';
 import 'package:eco_app/pages/search.dart';
 import 'package:flutter/material.dart';
+
+final usersRef = Firestore.instance.collection('users');
 
 class Home extends StatefulWidget {
   @override
