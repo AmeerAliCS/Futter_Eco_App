@@ -43,12 +43,14 @@ class _RoomChatState extends State<RoomChat> {
                         itemBuilder: (context, index) {
                           DocumentSnapshot message =
                               snapshot.data.documents[index];
-                          bool _isSamePerson = message['sender'] == widget.name;
-                          return Bubble(
-                              message: message['text'],
-                              time: "12:00",
+                          bool _isSamePerson = message['uid'] == widget.uid;
+                          return MessageBubble(
+                              messageSender: message['sender'],
+                              messageText: message['text'],
                               isMe: _isSamePerson,
-                              delivered: false);
+//                              time: "12:00",
+//                              delivered: false
+                          );
                         },
                       );
               },
@@ -72,6 +74,7 @@ class _RoomChatState extends State<RoomChat> {
                         .document()
                         .setData({
                       'sender': widget.name,
+                      'uid' : widget.uid,
                       'text': messageController.text,
                       'date': DateTime.now()
                     });
@@ -109,76 +112,50 @@ class _RoomChatState extends State<RoomChat> {
   }
 }
 
-class Bubble extends StatelessWidget {
-  Bubble({this.message, this.time, this.delivered, this.isMe});
 
-  final String message, time;
-  final delivered, isMe;
+class MessageBubble extends StatelessWidget {
+  MessageBubble({this.messageText, this.messageSender, this.isMe});
+
+  final String messageText;
+  final String messageSender;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
-    final bg = isMe ? Colors.white : Colors.pinkAccent.shade100;
-    final align = isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end;
-    final icon = delivered ? Icons.done_all : Icons.done;
-    final radius = isMe
-        ? BorderRadius.only(
-            topLeft: Radius.circular(5.0),
-            bottomLeft: Radius.circular(5.0),
-            bottomRight: Radius.circular(10.0),
-          )
-        : BorderRadius.only(
-            topRight: Radius.circular(5.0),
-            bottomLeft: Radius.circular(10.0),
-            bottomRight: Radius.circular(5.0),
-          );
-    return Column(
-      crossAxisAlignment: align,
-      children: <Widget>[
-        Container(
-          margin: const EdgeInsets.all(3.0),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  blurRadius: .5,
-                  spreadRadius: 1.0,
-                  color: Colors.black.withOpacity(.12))
-            ],
-            color: bg,
-            borderRadius: radius,
-          ),
-          child: Stack(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(right: 48.0),
-                child: Padding(padding: EdgeInsets.only(bottom: 6),
-                child: Text(message)),
-              ),
-              Positioned(
-                bottom: 0.0,
-                right: 0.0,
-                child: Row(
-                  children: <Widget>[
-                    Text(time,
-                        style: TextStyle(
-                          color: Colors.black38,
-                          fontSize: 10.0,
-                        )),
-                    SizedBox(width: 5),
-                    Text(
-                      'Hassan',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black38,
-                      ),
-                    )
-                  ],
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        children: [
+          Text(messageSender),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 2.0),
+            child: Material(
+              elevation: 5.0,
+              borderRadius: isMe
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0))
+                  : BorderRadius.only(
+                      topRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0)),
+              color: isMe ? Colors.lightBlueAccent : Colors.white,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 15.0),
+                child: Text(
+                  messageText,
+                  style: TextStyle(
+                      color: isMe ? Colors.white : Colors.black54,
+                      fontSize: 20.0),
                 ),
-              )
-            ],
+              ),
+            ),
           ),
-        )
-      ],
+        ],
+      ),
     );
   }
 }
