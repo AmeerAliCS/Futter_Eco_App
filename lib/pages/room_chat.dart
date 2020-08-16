@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class RoomChat extends StatefulWidget {
@@ -59,23 +60,32 @@ class _RoomChatState extends State<RoomChat> {
                   messageWidgets.add(messageWidget);
                 }
 
-                return ListView(
-                  reverse: true,
-                  children: messageWidgets,
+                return Column(
+                  children: [
+                    Padding(
+                      child: Text('القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا',
+                      style: TextStyle(fontWeight: FontWeight.bold),),
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                    ),
+                    Divider(),
+                    Expanded(
+                       child: ListView(
+                        reverse: true,
+                        children: messageWidgets,
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
           ),
           Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Colors.pinkAccent.shade100, width: 2.0),
-              ),
-            ),
+            color: Colors.pinkAccent.shade100,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                FlatButton(
+                IconButton(
+                  icon: Icon(Icons.arrow_upward, color: Colors.black, size: 30.0),
                   onPressed: () {
                     if(messageController.text.isNotEmpty){
                       Firestore.instance
@@ -92,28 +102,37 @@ class _RoomChatState extends State<RoomChat> {
                     }
                     messageController.clear();
                   },
-                  child: Text(
-                    'Send',
-                    style: TextStyle(
-                      color: Colors.pinkAccent.shade100,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
+                ),
+
+                IconButton(
+                  icon: Icon(Icons.tag_faces),
+                  onPressed: (){
+                    //show emoji
+                  },
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.all(5.0),
+                    color: Colors.white,
+                    child: TextField(
+                      controller: messageController,
+                      onChanged: (value) {
+                        messageText = value;
+                      },
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 20.0),
+                        hintText: 'اكتب رسالتك هنا...',
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: TextField(
-                    controller: messageController,
-                    onChanged: (value) {
-                      messageText = value;
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 20.0),
-                      hintText: 'اكتب رسالتك هنا...',
-                      border: InputBorder.none,
-                    ),
-                  ),
+                IconButton(
+                  icon: Icon(Icons.settings_voice),
+                  onPressed: (){
+
+                  },
                 ),
               ],
             ),
@@ -137,32 +156,31 @@ class MessageBubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
       child: Column(
-        crossAxisAlignment:
-            isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        crossAxisAlignment:CrossAxisAlignment.end,
         children: [
-          Text(messageSender),
+          Container(
+            height: 30.0,
+            color: Colors.black12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(height: 5.0,),
+                Padding(
+                  padding: EdgeInsets.only(left: 5.0),
+                  child: Text(messageSender, style: TextStyle(fontWeight: FontWeight.bold),),
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 2.0),
-            child: Material(
-              elevation: 5.0,
-              borderRadius: isMe
-                  ? BorderRadius.only(
-                      topLeft: Radius.circular(30.0),
-                      bottomLeft: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0))
-                  : BorderRadius.only(
-                      topRight: Radius.circular(30.0),
-                      bottomLeft: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0)),
-              color: isMe ? Colors.pinkAccent.shade100 : Colors.white,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 15.0),
-                child: Text(
-                  messageText,
-                  style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black54,
-                      fontSize: 20.0),
-                ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.0),
+              child: Text(
+                messageText,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.0),
               ),
             ),
           ),
