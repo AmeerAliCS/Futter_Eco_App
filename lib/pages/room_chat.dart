@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class _RoomChatState extends State<RoomChat> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<QuerySnapshot>(
               stream: Firestore.instance
                   .collection("iraq")
                   .document('najaf')
@@ -36,30 +37,39 @@ class _RoomChatState extends State<RoomChat> {
                   .orderBy('date')
                   .snapshots(),
               builder: (context, snapshot) {
-                return !snapshot.hasData
-                    ? Center(child: Text('انتظر رجاءا'))
-                    : ListView.builder(
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot message =
-                              snapshot.data.documents[index];
-                          bool _isSamePerson = message['uid'] == widget.uid;
-                          return MessageBubble(
-                              messageSender: message['sender'],
-                              messageText: message['text'],
-                              isMe: _isSamePerson,
-//                              time: "12:00",
-//                              delivered: false
-                          );
-                        },
-                      );
+
+                if (!snapshot.hasData) {
+                  return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.lightBlueAccent,
+                      ));
+                }
+
+                final messages = snapshot.data.documents.reversed;
+                List<MessageBubble> messageWidgets = [];
+                for (var message in messages) {
+                  final messageText = message['text'];
+                  final messageSender = message['sender'];
+                  final userUid = message['uid'];
+                  final messageWidget = MessageBubble(
+                    messageText: messageText,
+                    messageSender: messageSender,
+                    isMe: userUid == widget.uid,
+                  );
+                  messageWidgets.add(messageWidget);
+                }
+
+                return ListView(
+                  reverse: true,
+                  children: messageWidgets,
+                );
               },
             ),
           ),
           Container(
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
+                top: BorderSide(color: Colors.pinkAccent.shade100, width: 2.0),
               ),
             ),
             child: Row(
@@ -67,23 +77,25 @@ class _RoomChatState extends State<RoomChat> {
               children: <Widget>[
                 FlatButton(
                   onPressed: () {
-                    Firestore.instance
-                        .collection('iraq')
-                        .document('najaf')
-                        .collection('messages')
-                        .document()
-                        .setData({
-                      'sender': widget.name,
-                      'uid' : widget.uid,
-                      'text': messageController.text,
-                      'date': DateTime.now()
-                    });
+                    if(messageController.text.isNotEmpty){
+                      Firestore.instance
+                          .collection('iraq')
+                          .document('najaf')
+                          .collection('messages')
+                          .document()
+                          .setData({
+                        'sender': widget.name,
+                        'uid' : widget.uid,
+                        'text': messageController.text,
+                        'date': DateTime.now()
+                      });
+                    }
                     messageController.clear();
                   },
                   child: Text(
                     'Send',
                     style: TextStyle(
-                      color: Colors.lightBlueAccent,
+                      color: Colors.pinkAccent.shade100,
                       fontWeight: FontWeight.bold,
                       fontSize: 18.0,
                     ),
@@ -142,7 +154,7 @@ class MessageBubble extends StatelessWidget {
                       topRight: Radius.circular(30.0),
                       bottomLeft: Radius.circular(30.0),
                       bottomRight: Radius.circular(30.0)),
-              color: isMe ? Colors.lightBlueAccent : Colors.white,
+              color: isMe ? Colors.pinkAccent.shade100 : Colors.white,
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 15.0),
                 child: Text(
