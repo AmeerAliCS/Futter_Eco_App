@@ -1,7 +1,7 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class RoomChat extends StatefulWidget {
   RoomChat({@required this.name, @required this.uid});
@@ -16,6 +16,10 @@ class _RoomChatState extends State<RoomChat> {
   String messageText;
   TextEditingController messageController = TextEditingController();
   final DateTime timestamp = DateTime.now();
+
+  bool _showEmoji = false;
+  final FocusNode _textFocus = FocusNode();
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +42,11 @@ class _RoomChatState extends State<RoomChat> {
                   .orderBy('date')
                   .snapshots(),
               builder: (context, snapshot) {
-
                 if (!snapshot.hasData) {
                   return Center(
                       child: CircularProgressIndicator(
-                        backgroundColor: Colors.lightBlueAccent,
-                      ));
+                    backgroundColor: Colors.lightBlueAccent,
+                  ));
                 }
 
                 final messages = snapshot.data.documents.reversed;
@@ -62,14 +65,14 @@ class _RoomChatState extends State<RoomChat> {
 
                 return Column(
                   children: [
-                    Padding(
-                      child: Text('القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا القوانين تكتب هنا',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                    ),
+                    Container(
+                        child: Center(
+                              child: Text(
+                                  "المفروض الرسالة الاولى"),
+                        )),
                     Divider(),
                     Expanded(
-                       child: ListView(
+                      child: ListView(
                         reverse: true,
                         children: messageWidgets,
                       ),
@@ -85,9 +88,10 @@ class _RoomChatState extends State<RoomChat> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 IconButton(
-                  icon: Icon(Icons.arrow_upward, color: Colors.black, size: 30.0),
+                  icon: Icon(Icons.arrow_upward,
+                      color: Colors.greenAccent, size: 30.0),
                   onPressed: () {
-                    if(messageController.text.isNotEmpty){
+                    if (messageController.text.isNotEmpty) {
                       Firestore.instance
                           .collection('iraq')
                           .document('najaf')
@@ -95,7 +99,7 @@ class _RoomChatState extends State<RoomChat> {
                           .document()
                           .setData({
                         'sender': widget.name,
-                        'uid' : widget.uid,
+                        'uid': widget.uid,
                         'text': messageController.text,
                         'date': DateTime.now()
                       });
@@ -103,18 +107,51 @@ class _RoomChatState extends State<RoomChat> {
                     messageController.clear();
                   },
                 ),
-
+                Container(
+                  width: .5,
+                  height: 40,
+                  color: Colors.grey,
+                ),
                 IconButton(
-                  icon: Icon(Icons.tag_faces),
-                  onPressed: (){
-                    //show emoji
+                  icon: _showEmoji
+                      ? Icon(Icons.keyboard)
+                      : Icon(
+                          Icons.tag_faces,
+                          color: Colors.amberAccent,
+                        ),
+                  onPressed: () {
+                    if (_showEmoji == false) {
+                      _textFocus.unfocus();
+//                      FocusManager.instance.primaryFocus.unfocus(); //hid Keyboard
+                      setState(() {
+                        _showEmoji = !_showEmoji;
+                      });
+                    } else {
+                      _textFocus.requestFocus();
+                      setState(() {
+                        _showEmoji = !_showEmoji;
+                      });
+                    }
                   },
+                ),
+                Container(
+                  width: .5,
+                  height: 40,
+                  color: Colors.grey,
                 ),
                 Expanded(
                   child: Container(
                     margin: EdgeInsets.all(5.0),
-                    color: Colors.white,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
                     child: TextField(
+                      focusNode: _textFocus,
+                      onTap: () => setState(() {
+                        _showEmoji = false;
+                      }),
                       controller: messageController,
                       onChanged: (value) {
                         messageText = value;
@@ -123,26 +160,39 @@ class _RoomChatState extends State<RoomChat> {
                         contentPadding: EdgeInsets.symmetric(
                             vertical: 10.0, horizontal: 20.0),
                         hintText: 'اكتب رسالتك هنا...',
-                        border: InputBorder.none,
+                        border: InputBorder.none
                       ),
                     ),
                   ),
                 ),
+                Container(
+                  width: .5,
+                  height: 40,
+                  color: Colors.grey,
+                ),
                 IconButton(
-                  icon: Icon(Icons.settings_voice),
-                  onPressed: (){
-
-                  },
+                  icon: Icon(Icons.settings_voice, color: Colors.greenAccent),
+                  onPressed: () {},
                 ),
               ],
             ),
           ),
+          _showEmoji
+              ? EmojiPicker(
+                  rows: 4,
+                  columns: 8,
+                  buttonMode: ButtonMode.CUPERTINO,
+                  numRecommended: 10,
+                  onEmojiSelected: (emoji, category) {
+                    messageController.text += emoji.emoji;
+                  },
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
 }
-
 
 class MessageBubble extends StatelessWidget {
   MessageBubble({this.messageText, this.messageSender, this.isMe});
@@ -156,7 +206,7 @@ class MessageBubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
       child: Column(
-        crossAxisAlignment:CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
             height: 30.0,
@@ -164,10 +214,15 @@ class MessageBubble extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SizedBox(height: 5.0,),
+                SizedBox(
+                  height: 5.0,
+                ),
                 Padding(
                   padding: EdgeInsets.only(left: 5.0),
-                  child: Text(messageSender, style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: Text(
+                    messageSender,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -178,9 +233,7 @@ class MessageBubble extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 15.0),
               child: Text(
                 messageText,
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20.0),
+                style: TextStyle(color: Colors.black, fontSize: 20.0),
               ),
             ),
           ),
