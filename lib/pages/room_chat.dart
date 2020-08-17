@@ -261,8 +261,10 @@ class _RoomChatState extends State<RoomChat> {
               for (var user in users) {
                 final name = user['Name'];
                 final voiceRequest = user['voiceRequest'];
+                final leading = user['leading'];
                 final listOfUser = ListOfUsers(
                   name: name,
+                  leading: leading,
                   voiceRequest: voiceRequest,
                 );
                 listUsers.add(listOfUser);
@@ -298,8 +300,9 @@ class _RoomChatState extends State<RoomChat> {
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers({this.name, this.voiceRequest});
+  ListOfUsers({this.name, this.voiceRequest, this.leading});
   final String name;
+  final String leading;
   final bool voiceRequest;
 
   @override
@@ -311,7 +314,7 @@ class ListOfUsers extends StatelessWidget {
             name,
             style: TextStyle(fontSize: 20),
           ),
-          leading: Text('😍'),
+          leading: Text(leading),
           trailing: Text(voiceRequest ? '✋' : ''),
         ),
         Divider(

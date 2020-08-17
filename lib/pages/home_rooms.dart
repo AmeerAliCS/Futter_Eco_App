@@ -127,8 +127,6 @@ class _HomeRoomsState extends State<HomeRooms> {
     await usersRef.document(uid).setData({
       'Name' : _nameController.text,
       'Uid' : uid,
-      'voiceRequest' : false,
-      'micReqTime': DateTime.now()
     });
   }
 
@@ -137,6 +135,7 @@ class _HomeRoomsState extends State<HomeRooms> {
       'Name' : _nameController.text,
       'Uid' : uid,
       'voiceRequest' : false,
+      'leading': '💜',
       'micReqTime': DateTime.now() - Duration(hours: 1),
     });
   }
