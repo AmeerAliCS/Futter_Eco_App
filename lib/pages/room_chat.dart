@@ -351,32 +351,28 @@ class MessageBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Stack(
-            children: [
-              Container(
-                height: 30.0,
-                color: Colors.black12,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 5.0),
-                      child: Text(
-                        '$messageSender',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                      child: Text('😍'),
-                    ),
-                  ],
+          Container(
+            height: 30.0,
+            color: Colors.black12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 5.0,
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.only(left: 5.0),
+                  child: Text(
+                    '$messageSender',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Text('😍'),
+                ),
+              ],
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 2.0),
