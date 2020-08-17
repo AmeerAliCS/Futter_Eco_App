@@ -114,11 +114,11 @@ class _RoomChatState extends State<RoomChat> {
 
                   return Column(
                     children: [
-                      Container(
-                          child: Center(
-                           child: Text("المفروض الرسالة الاولى"),
-                      )),
-                      Divider(),
+//                      Container(
+//                          child: Center(
+//                           child: Text("المفروض الرسالة الاولى"),
+//                      )),
+//                      Divider(),
                       Expanded(
                         child: ListView(
                           reverse: true,
@@ -346,17 +346,18 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
-            height: 30.0,
             color: Colors.black12,
+            height: 30,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Expanded(
+                  child: Text("12:00AM"),
+                ),
                 SizedBox(
                   height: 5.0,
                 ),
@@ -390,7 +391,6 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
         ],
-      ),
     );
   }
 }
