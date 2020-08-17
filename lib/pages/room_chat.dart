@@ -280,7 +280,7 @@ class _RoomChatState extends State<RoomChat> {
               }
               return ListView(
                   children:
-                  List.from(micUsers.reversed)..addAll(listUsers)
+                  List.from(micUsers)..addAll(listUsers)
               );
             },
           ),
