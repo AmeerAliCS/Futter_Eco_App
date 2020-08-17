@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_app/components/rooms_list_tile.dart';
 import 'package:eco_app/pages/home.dart';
 import 'package:eco_app/pages/room_chat.dart';
@@ -106,6 +107,7 @@ class _HomeRoomsState extends State<HomeRooms> {
 
                     FirebaseAuth.instance.signInAnonymously().then((user){
                       createUserInFirestore(user.user.uid);
+                      createUserInsideRoom(user.user.uid);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => RoomChat(
                         name: _nameController.text,
                         uid: user.user.uid,
@@ -127,5 +129,14 @@ class _HomeRoomsState extends State<HomeRooms> {
       'Uid' : uid
     });
   }
+
+  createUserInsideRoom(String uid) async {
+    await Firestore.instance.collection('iraq').document('najaf').collection('users').document(uid).setData({
+      'Name' : _nameController.text,
+      'Uid' : uid,
+      'voiceRequest' : false
+    });
+  }
+
 }
 

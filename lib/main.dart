@@ -13,6 +13,7 @@ void main() => runApp(MaterialApp(
     supportedLocales: [
       const Locale('ar', 'AE')
     ],
+    debugShowCheckedModeBanner: false,
     home: Home()));
 
 
