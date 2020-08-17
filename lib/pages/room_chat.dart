@@ -322,7 +322,7 @@ class MessageBubble extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(left: 5.0),
                   child: Text(
-                    messageSender,
+                    '$messageSender 😍 ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -333,9 +333,14 @@ class MessageBubble extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 2.0),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.0),
-              child: Text(
-                messageText,
-                style: TextStyle(color: Colors.black, fontSize: 20.0),
+              child: GestureDetector(
+                 onTap: (){
+                   print('Tapped');
+                 },
+                 child: Text(
+                  messageText,
+                  style: TextStyle(color: Colors.black, fontSize: 20.0),
+                ),
               ),
             ),
           ),
