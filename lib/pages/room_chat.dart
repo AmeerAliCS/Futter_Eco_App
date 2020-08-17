@@ -258,18 +258,30 @@ class _RoomChatState extends State<RoomChat> {
               }
               final users = snapshot.data.documents;
               List<ListOfUsers> listUsers = [];
+              List<ListOfUsers> micUsers = [];
+
               for (var user in users) {
                 final name = user['Name'];
                 final voiceRequest = user['voiceRequest'];
                 final leading = user['leading'];
-                final listOfUser = ListOfUsers(
-                  name: name,
-                  leading: leading,
-                  voiceRequest: voiceRequest,
-                );
-                listUsers.add(listOfUser);
+                if (voiceRequest == true) {
+                  micUsers.add(ListOfUsers(
+                    name: name,
+                    leading: leading,
+                    voiceRequest: voiceRequest,
+                  ));
+                } else {
+                  listUsers.add(ListOfUsers(
+                    name: name,
+                    leading: leading,
+                    voiceRequest: voiceRequest,
+                  ));
+                }
               }
-              return ListView(children: listUsers);
+              return ListView(
+                  children:
+                  List.from(micUsers.reversed)..addAll(listUsers)
+              );
             },
           ),
         ),
