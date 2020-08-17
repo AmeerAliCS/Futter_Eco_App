@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:time/time.dart';
 
 class RoomChat extends StatefulWidget {
   RoomChat({@required this.name, @required this.uid});
@@ -115,7 +116,7 @@ class _RoomChatState extends State<RoomChat> {
                     children: [
                       Container(
                           child: Center(
-                        child: Text("المفروض الرسالة الاولى"),
+                           child: Text("المفروض الرسالة الاولى"),
                       )),
                       Divider(),
                       Expanded(
@@ -246,7 +247,7 @@ class _RoomChatState extends State<RoomChat> {
                 .collection("iraq")
                 .document('najaf')
                 .collection('users')
-                .orderBy('micReqTime')
+                .orderBy('micReqTime', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -278,23 +279,22 @@ class _RoomChatState extends State<RoomChat> {
     setState(() {
       voiceReqst = !voiceReqst;
     });
-    print(voiceReqst);
-    if (voiceReqst == true) {
-      Firestore.instance.collection('iraq').document('najaf').updateData({
-        'micQueue': FieldValue.arrayUnion([widget.uid.toString()])
-      });
-    } else {
-      Firestore.instance.collection('iraq').document('najaf').updateData({
-        'micQueue': FieldValue.arrayRemove([widget.uid.toString()])
-      });
+      if(voiceReqst){
+        Firestore.instance.collection('iraq').document('najaf')
+            .collection('users').document(widget.uid).updateData({
+          'voiceRequest' : voiceReqst,
+          'micReqTime' : DateTime.now()
+        });
+      }
+      else{
+        Firestore.instance.collection('iraq').document('najaf')
+            .collection('users').document(widget.uid).updateData({
+          'voiceRequest' : voiceReqst,
+          'micReqTime' : DateTime.now() - Duration(hours: 1),
+        });
+      }
+
     }
-    Firestore.instance
-        .collection('iraq')
-        .document('najaf')
-        .collection('users')
-        .document(widget.uid)
-        .updateData({'voiceRequest': voiceReqst, 'micReqTime': timestamp});
-  }
 }
 
 class ListOfUsers extends StatelessWidget {

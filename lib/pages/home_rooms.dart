@@ -4,6 +4,7 @@ import 'package:eco_app/pages/home.dart';
 import 'package:eco_app/pages/room_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:time/time.dart';
 
 class HomeRooms extends StatefulWidget {
   @override
@@ -114,7 +115,6 @@ class _HomeRoomsState extends State<HomeRooms> {
                       )));
                     });
 
-
                   }
                 });
               })
@@ -136,7 +136,8 @@ class _HomeRoomsState extends State<HomeRooms> {
     await Firestore.instance.collection('iraq').document('najaf').collection('users').document(uid).setData({
       'Name' : _nameController.text,
       'Uid' : uid,
-      'voiceRequest' : false
+      'voiceRequest' : false,
+      'micReqTime': DateTime.now() - Duration(hours: 1),
     });
   }
 
