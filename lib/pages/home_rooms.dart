@@ -126,7 +126,9 @@ class _HomeRoomsState extends State<HomeRooms> {
   createUserInFirestore(String uid) async {
     await usersRef.document(uid).setData({
       'Name' : _nameController.text,
-      'Uid' : uid
+      'Uid' : uid,
+      'voiceRequest' : false,
+      'micReqTime': DateTime.now()
     });
   }
 

@@ -32,42 +32,51 @@ class _RoomChatState extends State<RoomChat> {
         title: Row(
           children: [
             IconButton(
-              icon: Icon(Icons.menu, color: Colors.white70,size: 30,),
-              onPressed: () {
-
-              }
-            ),
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.white70,
+                  size: 30,
+                ),
+                onPressed: () {}),
             IconButton(
-              icon: Icon(Icons.chat_bubble, color: Colors.yellowAccent,size: 30,),
-              onPressed: () {
-
-              }
+                icon: Icon(
+                  Icons.chat_bubble,
+                  color: Colors.yellowAccent,
+                  size: 30,
+                ),
+                onPressed: () {}),
+            SizedBox(
+              width: 30.0,
             ),
-            SizedBox(width: 30.0,),
             Text('Room Chat'),
           ],
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(muteAudio ?Icons.volume_off :  Icons.volume_up, color: Colors.lightBlueAccent,size: 30,),
-            onPressed: (){
+            icon: Icon(
+              muteAudio ? Icons.volume_off : Icons.volume_up,
+              color: Colors.lightBlueAccent,
+              size: 30,
+            ),
+            onPressed: () {
               setState(() {
                 muteAudio = !muteAudio;
               });
             },
           ),
-
           IconButton(
-            icon: Icon(Icons.group, color: Colors.greenAccent,size: 30,),
-            onPressed: () => scaffoldKey.currentState.openDrawer(),
+            icon: Icon(
+              Icons.group,
+              color: Colors.greenAccent,
+              size: 30,
+            ),
+            onPressed: () => scaffoldKey.currentState.openEndDrawer(),
           ),
-
         ],
       ),
       body: Scaffold(
         key: scaffoldKey,
-
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,9 +115,8 @@ class _RoomChatState extends State<RoomChat> {
                     children: [
                       Container(
                           child: Center(
-                                child: Text(
-                                    "المفروض الرسالة الاولى"),
-                          )),
+                        child: Text("المفروض الرسالة الاولى"),
+                      )),
                       Divider(),
                       Expanded(
                         child: ListView(
@@ -196,11 +204,10 @@ class _RoomChatState extends State<RoomChat> {
                           messageText = value;
                         },
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 20.0),
-                          hintText: 'اكتب رسالتك هنا...',
-                          border: InputBorder.none
-                        ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 20.0),
+                            hintText: 'اكتب رسالتك هنا...',
+                            border: InputBorder.none),
                       ),
                     ),
                   ),
@@ -210,16 +217,12 @@ class _RoomChatState extends State<RoomChat> {
                     color: Colors.grey,
                   ),
                   IconButton(
-                    icon: Icon(voiceReqst ? Icons.settings_voice : Icons.keyboard_voice, color: Colors.greenAccent),
-                    onPressed: () {
-                      setState(() {
-                        voiceReqst = !voiceReqst;
-                      });
-                      Firestore.instance.collection('iraq').document('najaf')
-                          .collection('users').document(widget.uid).updateData({
-                        'voiceRequest' : voiceReqst
-                      });
-                    },
+                    icon: Icon(
+                        voiceReqst
+                            ? Icons.settings_voice
+                            : Icons.keyboard_voice,
+                        color: Colors.greenAccent),
+                    onPressed: _micFun,
                   ),
                 ],
               ),
@@ -237,16 +240,20 @@ class _RoomChatState extends State<RoomChat> {
                 : SizedBox(),
           ],
         ),
-
-        drawer: Drawer(
+        endDrawer: Drawer(
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection("iraq").document('najaf').collection('users').snapshots(),
-            builder: (context, snapshot){
+            stream: Firestore.instance
+                .collection("iraq")
+                .document('najaf')
+                .collection('users')
+                .orderBy('micReqTime')
+                .snapshots(),
+            builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: Colors.lightBlueAccent,
-                    ));
+                  backgroundColor: Colors.lightBlueAccent,
+                ));
               }
               final users = snapshot.data.documents;
               List<ListOfUsers> listUsers = [];
@@ -259,42 +266,61 @@ class _RoomChatState extends State<RoomChat> {
                 );
                 listUsers.add(listOfUser);
               }
-              return ListView(
-                children: listUsers
-              );
+              return ListView(children: listUsers);
             },
           ),
         ),
-
       ),
     );
+  }
+
+  Future<void> _micFun() async {
+    setState(() {
+      voiceReqst = !voiceReqst;
+    });
+    print(voiceReqst);
+    if (voiceReqst == true) {
+      Firestore.instance.collection('iraq').document('najaf').updateData({
+        'micQueue': FieldValue.arrayUnion([widget.uid.toString()])
+      });
+    } else {
+      Firestore.instance.collection('iraq').document('najaf').updateData({
+        'micQueue': FieldValue.arrayRemove([widget.uid.toString()])
+      });
+    }
+    Firestore.instance
+        .collection('iraq')
+        .document('najaf')
+        .collection('users')
+        .document(widget.uid)
+        .updateData({'voiceRequest': voiceReqst, 'micReqTime': timestamp});
   }
 }
 
 class ListOfUsers extends StatelessWidget {
-
   ListOfUsers({this.name, this.voiceRequest});
   final String name;
   final bool voiceRequest;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(name, style: TextStyle(fontSize: 20),),
-            leading: Text('😍'),
-            trailing: Text(voiceRequest ? '✋' : ''),
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            name,
+            style: TextStyle(fontSize: 20),
           ),
-          Divider(color: Colors.black54,),
-        ],
-      ),
+          leading: Text('😍'),
+          trailing: Text(voiceRequest ? '✋' : ''),
+        ),
+        Divider(
+          color: Colors.black54,
+        ),
+      ],
     );
   }
 }
-
 
 class MessageBubble extends StatelessWidget {
   MessageBubble({this.messageText, this.messageSender, this.isMe});
@@ -334,10 +360,10 @@ class MessageBubble extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.0),
               child: GestureDetector(
-                 onTap: (){
-                   print('Tapped');
-                 },
-                 child: Text(
+                onTap: () {
+                  print('Tapped');
+                },
+                child: Text(
                   messageText,
                   style: TextStyle(color: Colors.black, fontSize: 20.0),
                 ),
