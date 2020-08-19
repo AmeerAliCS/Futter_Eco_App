@@ -6,19 +6,21 @@ class RoomsListTile extends StatelessWidget {
       @required this.imageUrl,
       @required this.joinNumber,
       @required this.messageNumber,
-      @required this.onTap
-      });
+      @required this.onTap,
+      @required this.longTap});
 
   final String title;
   final String imageUrl;
   final int joinNumber;
   final int messageNumber;
   final Function onTap;
+  final Function longTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
        onTap: onTap,
+       onLongPress: longTap,
        child: ListTile(
         title: Text(title),
         leading:

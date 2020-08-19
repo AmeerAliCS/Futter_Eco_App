@@ -5,9 +5,11 @@ import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
 
 class RoomChat extends StatefulWidget {
-  RoomChat({@required this.name, @required this.uid});
+  RoomChat({@required this.name, @required this.uid, @required this.code, @required this.roomId});
   final String name;
   final String uid;
+  final String roomId;
+  final String code;
 
   @override
   _RoomChatState createState() => _RoomChatState();
@@ -17,12 +19,43 @@ class _RoomChatState extends State<RoomChat> {
   String messageText;
   TextEditingController messageController = TextEditingController();
   final DateTime timestamp = DateTime.now();
+  bool isAdmin = false;
 
   bool _showEmoji = false;
   final FocusNode _textFocus = FocusNode();
   var scaffoldKey = GlobalKey<ScaffoldState>();
   bool muteAudio = false;
   bool voiceReqst = false;
+
+
+  List<AdminStruct> listOfAdmin = [];
+  getAdmin() async {
+    QuerySnapshot snapshot = await Firestore.instance.collection('iraq')
+        .document('najaf').collection('roomAdmin').getDocuments();
+
+    snapshot.documents.forEach((val){
+      print(val.data['Uid']);
+      listOfAdmin.add(AdminStruct(code: val.data['Code'], roomId: val.data['RoomID']));
+    });
+
+    for(int i = 0; i < listOfAdmin.length; i++){
+      if(widget.code == listOfAdmin[i].code && widget.roomId == listOfAdmin[i].roomId){
+        setState(() {
+          isAdmin = true;
+        });
+      }
+    }
+
+//    setState(() {
+//      followersCount = snapshot.documents.length;
+//    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAdmin();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +297,7 @@ class _RoomChatState extends State<RoomChat> {
                 final name = user['Name'];
                 final voiceRequest = user['voiceRequest'];
                 final leading = user['leading'];
+
                 if (voiceRequest == true) {
                   micUsers.add(ListOfUsers(
                     name: name,
@@ -275,6 +309,7 @@ class _RoomChatState extends State<RoomChat> {
                     name: name,
                     leading: leading,
                     voiceRequest: voiceRequest,
+                    isAdmin: isAdmin,
                   ));
                 }
               }
@@ -312,22 +347,28 @@ class _RoomChatState extends State<RoomChat> {
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers({this.name, this.voiceRequest, this.leading});
+  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin});
   final String name;
   final String leading;
   final bool voiceRequest;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          title: Text(
-            name,
-            style: TextStyle(fontSize: 20),
+        GestureDetector(
+          onTap: (){
+            isAdmin ? print('Admin Click') : print('User Click');
+          },
+           child: ListTile(
+            title: Text(
+              name,
+              style: TextStyle(fontSize: 20),
+            ),
+            leading: Text(leading),
+            trailing: Text(voiceRequest ? '✋' : ''),
           ),
-          leading: Text(leading),
-          trailing: Text(voiceRequest ? '✋' : ''),
         ),
         Divider(
           color: Colors.black54,
@@ -393,4 +434,10 @@ class MessageBubble extends StatelessWidget {
         ],
     );
   }
+}
+
+class AdminStruct{
+  AdminStruct({this.roomId, this.code});
+  String roomId;
+  String code;
 }
