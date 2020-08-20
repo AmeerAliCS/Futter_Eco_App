@@ -57,8 +57,6 @@ class _RoomChatState extends State<RoomChat> {
   bool _isInChannel = false;
   final _infoStrings = <String>[];
 
-  static final _sessions = List<VideoSession>();
-
   /// remote user list
   final _remoteUsers = List<int>();
 
@@ -162,11 +160,13 @@ class _RoomChatState extends State<RoomChat> {
 
                   return Column(
                     children: [
-//                      Container(
-//                          child: Center(
-//                           child: Text("المفروض الرسالة الاولى"),
-//                      )),
-//                      Divider(),
+                     Container(
+                         child: Center(
+                          child: IconButton(icon: Icon(Icons.mic), onPressed: () => {
+                            _toggleChannel()
+                          })//Text("المفروض الرسالة الاولى"),
+                     )),
+                     Divider(),
                       Expanded(
                         child: ListView(
                           reverse: true,
@@ -422,7 +422,7 @@ Future<void> _initAgoraRtcEngine() async {
       } else {
         _isInChannel = true;
         await AgoraRtcEngine.startPreview();
-        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
+        await AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
       }
     });
   }
@@ -448,15 +448,7 @@ Future<void> _initAgoraRtcEngine() async {
     }
   }
 
-  VideoSession _getVideoSession(int uid) {
-    return _sessions.firstWhere((session) {
-      return session.uid == uid;
-    });
-  }
 
-  List<Widget> _getRenderViews() {
-    return _sessions.map((session) => session.view).toList();
-  }
 
   static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
 
@@ -472,18 +464,6 @@ Future<void> _initAgoraRtcEngine() async {
       itemCount: _infoStrings.length,
     );
   }
-}
-
-class VideoSession {
-  int uid;
-  Widget view;
-  int viewId;
-
-  VideoSession(int uid, Widget view) {
-    this.uid = uid;
-    this.view = view;
-  }
-
 }
 
 class ListOfUsers extends StatelessWidget {
