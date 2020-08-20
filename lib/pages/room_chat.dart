@@ -6,7 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
 
 class RoomChat extends StatefulWidget {
-  RoomChat({@required this.name, @required this.uid, @required this.code, @required this.roomId});
+  RoomChat(
+      {@required this.name,
+      @required this.uid,
+      @required this.code,
+      @required this.roomId});
   final String name;
   final String uid;
   final String roomId;
@@ -28,36 +32,37 @@ class _RoomChatState extends State<RoomChat> {
   bool muteAudio = false;
   bool voiceReqst = false;
 
-
   List<AdminStruct> listOfAdmin = [];
   getAdmin() async {
-    QuerySnapshot snapshot = await Firestore.instance.collection('iraq')
-        .document('najaf').collection('roomAdmin').getDocuments();
+    QuerySnapshot snapshot = await Firestore.instance
+        .collection('iraq')
+        .document('najaf')
+        .collection('roomAdmin')
+        .getDocuments();
 
-    snapshot.documents.forEach((val){
+    snapshot.documents.forEach((val) {
       print(val.data['Uid']);
-      listOfAdmin.add(AdminStruct(code: val.data['Code'], roomId: val.data['RoomID']));
+      listOfAdmin
+          .add(AdminStruct(code: val.data['Code'], roomId: val.data['RoomID']));
     });
 
-    for(int i = 0; i < listOfAdmin.length; i++){
-      if(widget.code == listOfAdmin[i].code && widget.roomId == listOfAdmin[i].roomId){
+    for (int i = 0; i < listOfAdmin.length; i++) {
+      if (widget.code == listOfAdmin[i].code &&
+          widget.roomId == listOfAdmin[i].roomId) {
         setState(() {
           isAdmin = true;
         });
       }
     }
-
   }
 
-//Mic 
+//Mic
 
   bool _isInChannel = false;
   final _infoStrings = <String>[];
 
   /// remote user list
   final _remoteUsers = List<int>();
-
-
 
   @override
   void initState() {
@@ -157,13 +162,15 @@ class _RoomChatState extends State<RoomChat> {
 
                   return Column(
                     children: [
-                     Container(
-                         child: Center(
-                          child: IconButton(icon: Icon(Icons.mic), onPressed: () => {
-                            _toggleChannel()
-                          })//Text("المفروض الرسالة الاولى"),
-                     )),
-                     Divider(),
+                      Container(
+                          child: Center(
+                              child: IconButton(
+                                  icon: Icon(Icons.mic),
+                                  onPressed: () => {
+                                        _toggleChannel()
+                                      }) //Text("المفروض الرسالة الاولى"),
+                              )),
+                      Divider(),
                       Expanded(
                         child: ListView(
                           reverse: true,
@@ -325,10 +332,7 @@ class _RoomChatState extends State<RoomChat> {
                   ));
                 }
               }
-              return ListView(
-                  children:
-                  List.from(micUsers)..addAll(listUsers)
-              );
+              return ListView(children: List.from(micUsers)..addAll(listUsers));
             },
           ),
         ),
@@ -340,27 +344,30 @@ class _RoomChatState extends State<RoomChat> {
     setState(() {
       voiceReqst = !voiceReqst;
     });
-      if(voiceReqst){
-        Firestore.instance.collection('iraq').document('najaf')
-            .collection('users').document(widget.uid).updateData({
-          'voiceRequest' : voiceReqst,
-          'micReqTime' : DateTime.now()
-        });
-      }
-      else{
-        Firestore.instance.collection('iraq').document('najaf')
-            .collection('users').document(widget.uid).updateData({
-          'voiceRequest' : voiceReqst,
-          'micReqTime' : DateTime.now() - Duration(hours: 1),
-        });
-      }
-
+    if (voiceReqst) {
+      Firestore.instance
+          .collection('iraq')
+          .document('najaf')
+          .collection('users')
+          .document(widget.uid)
+          .updateData(
+              {'voiceRequest': voiceReqst, 'micReqTime': DateTime.now()});
+    } else {
+      Firestore.instance
+          .collection('iraq')
+          .document('najaf')
+          .collection('users')
+          .document(widget.uid)
+          .updateData({
+        'voiceRequest': voiceReqst,
+        'micReqTime': DateTime.now() - Duration(hours: 1),
+      });
     }
+  }
 
 //Mic Functions
 
-
-Future<void> _initAgoraRtcEngine() async {
+  Future<void> _initAgoraRtcEngine() async {
     AgoraRtcEngine.create('2bd96b8c4aa74c648b5a4d225bbce8ba');
 
     AgoraRtcEngine.enableAudio();
@@ -368,7 +375,6 @@ Future<void> _initAgoraRtcEngine() async {
     AgoraRtcEngine.muteAllRemoteAudioStreams(true);
     // AgoraRtcEngine.setParameters('{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}');
     AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
-
 
     // AgoraRtcEngine.enableVideo();
 
@@ -411,19 +417,16 @@ Future<void> _initAgoraRtcEngine() async {
   }
 
   void _toggleChannel() {
-    if(_isInChannel){
+    if (_isInChannel) {
       setState(() {
         _isInChannel = false;
-         AgoraRtcEngine.leaveChannel();
-         AgoraRtcEngine.stopPreview();
+        AgoraRtcEngine.leaveChannel();
+        AgoraRtcEngine.stopPreview();
       });
-    }
-
-    else {
+    } else {
       _isInChannel = true;
 //       AgoraRtcEngine.startPreview();
-       AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
-      print(_infoStrings[0]);
+      AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
     }
   }
 
@@ -447,8 +450,6 @@ Future<void> _initAgoraRtcEngine() async {
       yield AgoraRenderWidget(uid);
     }
   }
-
-
 
   static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
 
@@ -478,10 +479,10 @@ class ListOfUsers extends StatelessWidget {
     return Column(
       children: [
         GestureDetector(
-          onTap: (){
+          onTap: () {
             isAdmin ? print('Admin Click') : print('User Click');
           },
-           child: ListTile(
+          child: ListTile(
             title: Text(
               name,
               style: TextStyle(fontSize: 20),
@@ -508,55 +509,55 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            color: Colors.black12,
-            height: 30,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text("12:00AM"),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 5.0),
-                  child: Text(
-                    '$messageSender',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: Text('😍'),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 2.0),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0),
-              child: GestureDetector(
-                onTap: () {
-                  print('Tapped');
-                },
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          color: Colors.black12,
+          height: 30,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text("12:00AM"),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 5.0),
                 child: Text(
-                  messageText,
-                  style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  '$messageSender',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10.0),
+                child: Text('😍'),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 2.0),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.0),
+            child: GestureDetector(
+              onTap: () {
+                print('Tapped');
+              },
+              child: Text(
+                messageText,
+                style: TextStyle(color: Colors.black, fontSize: 20.0),
               ),
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 }
 
-class AdminStruct{
+class AdminStruct {
   AdminStruct({this.roomId, this.code});
   String roomId;
   String code;
