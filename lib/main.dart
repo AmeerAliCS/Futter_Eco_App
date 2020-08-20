@@ -111,6 +111,8 @@ class _MyAppState extends State<MyApp> {
     AgoraRtcEngine.enableAudio();
     AgoraRtcEngine.setDefaultAudioRouteToSpeaker(true);
     AgoraRtcEngine.setEnableSpeakerphone(true);
+    AgoraRtcEngine.muteLocalAudioStream(true);
+
 
     AgoraRtcEngine.isSpeakerphoneEnabled()
         .then((value) => print('is Speaker: $value'));
