@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
                    style: textStyle),
                onPressed: _toggleChannel,
              ),
-             MaterialButton(onPressed: _mute1),
+             MaterialButton(onPressed: _mute1, child: Text('Mute Id')),
              Container(height: 100, child: _voiceDropdown()),
              Expanded(child: Container(child: _buildInfoList())),
            ],
@@ -118,7 +118,7 @@ class _MyAppState extends State<MyApp> {
 
 
  Future<void> _mute1() async {
-   int x = int.parse(_controller.text) * -1;
+   int x = int.parse(_controller.text);
    AgoraRtcEngine.muteRemoteAudioStream(x, false);
  }
 
