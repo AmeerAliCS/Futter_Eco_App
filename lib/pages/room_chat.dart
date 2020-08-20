@@ -47,9 +47,6 @@ class _RoomChatState extends State<RoomChat> {
       }
     }
 
-//    setState(() {
-//      followersCount = snapshot.documents.length;
-//    });
   }
 
 //Mic 
@@ -414,17 +411,20 @@ Future<void> _initAgoraRtcEngine() async {
   }
 
   void _toggleChannel() {
-    setState(() async {
-      if (_isInChannel) {
+    if(_isInChannel){
+      setState(() {
         _isInChannel = false;
-        await AgoraRtcEngine.leaveChannel();
-        await AgoraRtcEngine.stopPreview();
-      } else {
-        _isInChannel = true;
-        await AgoraRtcEngine.startPreview();
-        await AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
-      }
-    });
+         AgoraRtcEngine.leaveChannel();
+         AgoraRtcEngine.stopPreview();
+      });
+    }
+
+    else {
+      _isInChannel = true;
+//       AgoraRtcEngine.startPreview();
+       AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
+      print(_infoStrings[0]);
+    }
   }
 
   Widget _viewRows() {
