@@ -141,7 +141,7 @@ class _MyAppState extends State<MyApp> {
 //    AgoraRtcEngine.enableDualStreamMode(true);
 //    AgoraRtcEngine.enableLocalAudio(true);
 //    // AgoraRtcEngine.setParameters('{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}');
-    AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
+    AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
 
 //
 //    VideoEncoderConfiguration config = VideoEncoderConfiguration();
@@ -209,7 +209,7 @@ class _MyAppState extends State<MyApp> {
       } else {
         _isInChannel = true;
         await AgoraRtcEngine.startPreview();
-        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
+        await AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
       }
     });
   }
