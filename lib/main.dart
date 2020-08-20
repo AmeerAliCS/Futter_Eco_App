@@ -65,7 +65,12 @@ class _MyAppState extends State<MyApp> {
                     style: textStyle),
                 onPressed: _toggleChannel,
               ),
-              MaterialButton(onPressed: _mute1, child: Text('Mute Id')),
+              Row(
+                children: <Widget>[
+                  MaterialButton(onPressed: audienceFuc, child: Text('Audience')),
+                  MaterialButton(onPressed: broadcasterFun, child: Text('Broadcaste'))
+                ],
+              ),
               Container(height: 100, child: _voiceDropdown()),
               Expanded(child: Container(child: _buildInfoList())),
             ],
@@ -101,9 +106,23 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _mute1() async {
     int x = int.parse(_controller.text);
-    AgoraRtcEngine.muteAllRemoteAudioStreams(true);
+
+    // List<AudioVolumeInfo> s = [AudioVolumeInfo(x, 250)];
+    // AgoraRtcEngine.onAudioVolumeIndication(250, s);
+    //VolumeIndicationHandler
+
     AgoraRtcEngine.muteRemoteAudioStream(x, false);
   }
+
+  Future<void> audienceFuc() async {
+    AgoraRtcEngine.setClientRole(ClientRole.Audience);
+
+  }
+
+  Future<void> broadcasterFun() async {
+        AgoraRtcEngine.setClientRole(ClientRole.Broadcaster);
+  }
+
 
   Future<void> _initAgoraRtcEngine() async {
     AgoraRtcEngine.create('2bd96b8c4aa74c648b5a4d225bbce8ba');
@@ -111,8 +130,7 @@ class _MyAppState extends State<MyApp> {
     AgoraRtcEngine.enableAudio();
     AgoraRtcEngine.setDefaultAudioRouteToSpeaker(true);
     AgoraRtcEngine.setEnableSpeakerphone(true);
-    AgoraRtcEngine.muteLocalAudioStream(true);
-
+    // AgoraRtcEngine.muteLocalAudioStream(true);
 
     AgoraRtcEngine.isSpeakerphoneEnabled()
         .then((value) => print('is Speaker: $value'));
@@ -123,7 +141,8 @@ class _MyAppState extends State<MyApp> {
 //    AgoraRtcEngine.enableDualStreamMode(true);
 //    AgoraRtcEngine.enableLocalAudio(true);
 //    // AgoraRtcEngine.setParameters('{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}');
-    AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
+    AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+
 //
 //    VideoEncoderConfiguration config = VideoEncoderConfiguration();
 //    config.orientationMode = VideoOutputOrientationMode.FixedPortrait;
@@ -145,11 +164,6 @@ class _MyAppState extends State<MyApp> {
     };
 
     AgoraRtcEngine.onLeaveChannel = () {
-      AgoraRtcEngine.setDefaultAudioRouteToSpeaker(true);
-      AgoraRtcEngine.setEnableSpeakerphone(true);
-
-      AgoraRtcEngine.isSpeakerphoneEnabled()
-          .then((value) => print('is Speaker: $value'));
       setState(() {
         _infoStrings.add('onLeaveChannel');
         _remoteUsers.clear();
@@ -157,11 +171,6 @@ class _MyAppState extends State<MyApp> {
     };
 
     AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
-      AgoraRtcEngine.setDefaultAudioRouteToSpeaker(true);
-      AgoraRtcEngine.setEnableSpeakerphone(true);
-
-      AgoraRtcEngine.isSpeakerphoneEnabled()
-          .then((value) => print('is Speaker: $value'));
       setState(() {
         String info = 'userJoined: ' + uid.toString();
         _infoStrings.add(info);
@@ -200,7 +209,7 @@ class _MyAppState extends State<MyApp> {
       } else {
         _isInChannel = true;
         await AgoraRtcEngine.startPreview();
-        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
+        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 5);
       }
     });
   }
