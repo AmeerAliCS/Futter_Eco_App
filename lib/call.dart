@@ -157,7 +157,7 @@ class _CallPageState extends State<CallPage> {
       case 1:
         return Container(
             child: Column(
-          children: <Widget>[_videoView(views[0])],
+             children: <Widget>[_videoView(views[0])],
         ));
       case 2:
         return Container(

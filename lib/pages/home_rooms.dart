@@ -1,9 +1,11 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_app/components/rooms_list_tile.dart';
 import 'package:eco_app/pages/home.dart';
 import 'package:eco_app/pages/room_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:time/time.dart';
 
 class HomeRooms extends StatefulWidget {
@@ -19,10 +21,16 @@ class _HomeRoomsState extends State<HomeRooms> {
   TextEditingController _codeController = TextEditingController();
   bool nameValidate = false;
   final _formKey = GlobalKey<FormState>();
+  ClientRole _role = ClientRole.Audience;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Eco App'),
+        backgroundColor: Colors.pinkAccent.shade100,
+        centerTitle: true,
+      ),
       body: Center(
         child: ListView(
           children: <Widget>[
@@ -142,11 +150,14 @@ class _HomeRoomsState extends State<HomeRooms> {
                     FirebaseAuth.instance.signInAnonymously().then((user){
                       createUserInFirestore(user.user.uid);
                       createUserInsideRoom(user.user.uid);
+                      _handleMic();
                       Navigator.push(context, MaterialPageRoute(builder: (context) => RoomChat(
                         name: _nameController.text,
                         uid: user.user.uid,
                         roomId: _roomIdController.text,
                         code: _codeController.text,
+                        channelName: 'najaf',
+                        role: _role,
                       )));
                     });
 
@@ -197,11 +208,14 @@ class _HomeRoomsState extends State<HomeRooms> {
                     FirebaseAuth.instance.signInAnonymously().then((user){
                       createUserInFirestore(user.user.uid);
                       createUserInsideRoom(user.user.uid);
+                      _handleMic();
                       Navigator.push(context, MaterialPageRoute(builder: (context) => RoomChat(
                         name: _nameController.text,
                         uid: user.user.uid,
                         roomId: '0000',
                         code: '0000',
+                        channelName: 'najaf',
+                        role: _role,
                       )));
                     });
 
@@ -211,6 +225,11 @@ class _HomeRoomsState extends State<HomeRooms> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleMic() async {
+    await Permission.microphone.request();
+    await Permission.storage.request();
   }
 
   createUserInFirestore(String uid) async {
@@ -227,6 +246,7 @@ class _HomeRoomsState extends State<HomeRooms> {
       'voiceRequest' : false,
       'isAdmin' : false ,
       'leading': '💜',
+      'allowSpeak' : false ,
       'micReqTime': DateTime.now() - Duration(hours: 1),
     });
   }

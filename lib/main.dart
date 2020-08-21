@@ -1,6 +1,7 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:eco_app/call.dart';
 import 'package:eco_app/pages/home.dart';
+import 'package:eco_app/pages/home_rooms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,7 +13,7 @@ void main() => runApp(MaterialApp(localizationsDelegates: [
       GlobalCupertinoLocalizations.delegate,
     ], supportedLocales: [
       const Locale('ar', 'AE')
-    ], debugShowCheckedModeBanner: false, home: IndexPage()));
+    ], debugShowCheckedModeBanner: false, home: HomeRooms()));
 
 
 

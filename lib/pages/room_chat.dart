@@ -1,20 +1,20 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eco_app/utils/settings.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
 
 class RoomChat extends StatefulWidget {
-  RoomChat(
-      {@required this.name,
-      @required this.uid,
-      @required this.code,
-      @required this.roomId});
+  RoomChat({@required this.name, @required this.uid, @required this.code, @required this.roomId
+  ,@required this.channelName, @required this.role});
   final String name;
   final String uid;
   final String roomId;
   final String code;
+  final String channelName;
+  final ClientRole role;
 
   @override
   _RoomChatState createState() => _RoomChatState();
@@ -31,6 +31,10 @@ class _RoomChatState extends State<RoomChat> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
   bool muteAudio = false;
   bool voiceReqst = false;
+  final _infoStrings = <String>[];
+  bool muted = false;
+  static bool allowSpeaker = false;
+  ClientRole broadcaster = ClientRole.Broadcaster;
 
   List<AdminStruct> listOfAdmin = [];
   getAdmin() async {
@@ -56,20 +60,90 @@ class _RoomChatState extends State<RoomChat> {
     }
   }
 
-//Mic
-
-  bool _isInChannel = false;
-  final _infoStrings = <String>[];
-
-  /// remote user list
-  final _remoteUsers = List<int>();
+  @override
+  void dispose() {
+    // destroy sdk
+    AgoraRtcEngine.leaveChannel();
+    AgoraRtcEngine.destroy();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     getAdmin();
-    _initAgoraRtcEngine();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    if (APP_ID.isEmpty) {
+      setState(() {
+        _infoStrings.add(
+          'APP_ID missing, please provide your APP_ID in settings.dart',
+        );
+        _infoStrings.add('Agora Engine is not starting');
+      });
+      return;
+    }
+
+    await _initAgoraRtcEngine();
     _addAgoraEventHandlers();
+    await AgoraRtcEngine.enableWebSdkInteroperability(true);
+//    VideoEncoderConfiguration configuration = VideoEncoderConfiguration();
+//    configuration.dimensions = Size(1920, 1080);
+//    await AgoraRtcEngine.setVideoEncoderConfiguration(configuration);
+    await AgoraRtcEngine.enableAudio();
+    await AgoraRtcEngine.joinChannel(null, widget.channelName, null, 0);
+  }
+
+  /// Create agora sdk instance and initialize
+  Future<void> _initAgoraRtcEngine() async {
+    await AgoraRtcEngine.create(APP_ID);
+//    await AgoraRtcEngine.enableVideo();
+    await AgoraRtcEngine.enableAudio();
+    await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    await AgoraRtcEngine.setClientRole(allowSpeaker ? broadcaster : widget.role);
+  }
+
+  /// Add agora event handlers
+  void _addAgoraEventHandlers() {
+    AgoraRtcEngine.onError = (dynamic code) {
+      setState(() {
+        final info = 'onError: $code';
+        _infoStrings.add(info);
+      });
+    };
+
+    AgoraRtcEngine.onJoinChannelSuccess = (
+        String channel,
+        int uid,
+        int elapsed,
+        ) {
+      setState(() {
+        final info = 'onJoinChannel: $channel, uid: $uid';
+        _infoStrings.add(info);
+      });
+    };
+
+    AgoraRtcEngine.onLeaveChannel = () {
+      setState(() {
+        _infoStrings.add('onLeaveChannel');
+      });
+    };
+
+    AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
+      setState(() {
+        final info = 'userJoined: $uid';
+        _infoStrings.add(info);
+      });
+    };
+
+    AgoraRtcEngine.onUserOffline = (int uid, int reason) {
+      setState(() {
+        final info = 'userOffline: $uid';
+        _infoStrings.add(info);
+      });
+    };
   }
 
   @override
@@ -167,7 +241,7 @@ class _RoomChatState extends State<RoomChat> {
                               child: IconButton(
                                   icon: Icon(Icons.mic),
                                   onPressed: () => {
-                                        _toggleChannel()
+                                        print('Hello')
                                       }) //Text("المفروض الرسالة الاولى"),
                               )),
                       Divider(),
@@ -312,16 +386,29 @@ class _RoomChatState extends State<RoomChat> {
               List<ListOfUsers> listUsers = [];
               List<ListOfUsers> micUsers = [];
 
+
               for (var user in users) {
                 final name = user['Name'];
                 final voiceRequest = user['voiceRequest'];
                 final leading = user['leading'];
+                final userUid = user['Uid'];
+                final speakAllow = user['allowSpeak'];
+
+                if(userUid == widget.uid){
+//                  setState(() {
+//                    allowSpeak = speakAllow;
+//                  });
+                }
+
 
                 if (voiceRequest == true) {
                   micUsers.add(ListOfUsers(
                     name: name,
                     leading: leading,
                     voiceRequest: voiceRequest,
+                    uid: userUid,
+                    allowSpeak: speakAllow,
+                    isAdmin: isAdmin,
                   ));
                 } else {
                   listUsers.add(ListOfUsers(
@@ -329,9 +416,12 @@ class _RoomChatState extends State<RoomChat> {
                     leading: leading,
                     voiceRequest: voiceRequest,
                     isAdmin: isAdmin,
+                    uid: userUid,
+                    allowSpeak: speakAllow,
                   ));
                 }
               }
+
               return ListView(children: List.from(micUsers)..addAll(listUsers));
             },
           ),
@@ -364,113 +454,14 @@ class _RoomChatState extends State<RoomChat> {
       });
     }
   }
-
-//Mic Functions
-
-  Future<void> _initAgoraRtcEngine() async {
-    AgoraRtcEngine.create('2bd96b8c4aa74c648b5a4d225bbce8ba');
-
-    AgoraRtcEngine.enableAudio();
-    AgoraRtcEngine.setEnableSpeakerphone(true);
-    AgoraRtcEngine.muteAllRemoteAudioStreams(true);
-    // AgoraRtcEngine.setParameters('{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}');
-    AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
-
-    // AgoraRtcEngine.enableVideo();
-
-    // VideoEncoderConfiguration config = VideoEncoderConfiguration();
-    // config.orientationMode = VideoOutputOrientationMode.FixedPortrait;
-    // AgoraRtcEngine.setVideoEncoderConfiguration(config);
-  }
-
-  void _addAgoraEventHandlers() {
-    AgoraRtcEngine.onJoinChannelSuccess =
-        (String channel, int uid, int elapsed) {
-      setState(() {
-        String info = 'onJoinChannel: ' + channel + ', uid: ' + uid.toString();
-        _infoStrings.add(info);
-      });
-    };
-
-    AgoraRtcEngine.onLeaveChannel = () {
-      setState(() {
-        _infoStrings.add('onLeaveChannel');
-        _remoteUsers.clear();
-      });
-    };
-
-    AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
-      setState(() {
-        String info = 'userJoined: ' + uid.toString();
-        _infoStrings.add(info);
-        _remoteUsers.add(uid);
-      });
-    };
-
-    AgoraRtcEngine.onUserOffline = (int uid, int reason) {
-      setState(() {
-        String info = 'userOffline: ' + uid.toString();
-        _infoStrings.add(info);
-        _remoteUsers.remove(uid);
-      });
-    };
-  }
-
-  void _toggleChannel() {
-    if (_isInChannel) {
-      setState(() {
-        _isInChannel = false;
-        AgoraRtcEngine.leaveChannel();
-        AgoraRtcEngine.stopPreview();
-      });
-    } else {
-      _isInChannel = true;
-//       AgoraRtcEngine.startPreview();
-      AgoraRtcEngine.joinChannel(null, 'najaf', null, 0);
-    }
-  }
-
-  Widget _viewRows() {
-    return Row(
-      children: <Widget>[
-        for (final widget in _renderWidget)
-          Expanded(
-            child: Container(
-              child: widget,
-            ),
-          )
-      ],
-    );
-  }
-
-  Iterable<Widget> get _renderWidget sync* {
-    yield AgoraRenderWidget(0, local: true, preview: false);
-
-    for (final uid in _remoteUsers) {
-      yield AgoraRenderWidget(uid);
-    }
-  }
-
-  static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
-
-  Widget _buildInfoList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
-      itemExtent: 24,
-      itemBuilder: (context, i) {
-        return ListTile(
-          title: Text(_infoStrings[i]),
-        );
-      },
-      itemCount: _infoStrings.length,
-    );
-  }
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin});
+  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin, this.uid, this.allowSpeak});
   final String name;
   final String leading;
+  final String uid;
+  final bool allowSpeak;
   final bool voiceRequest;
   final bool isAdmin;
 
@@ -480,7 +471,12 @@ class ListOfUsers extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            isAdmin ? print('Admin Click') : print('User Click');
+            isAdmin ? Firestore.instance.collection('iraq')
+                .document('najaf').collection('users').document(uid).updateData({
+              'allowSpeak' : !allowSpeak
+            })
+                :
+            print('User Click');
           },
           child: ListTile(
             title: Text(
