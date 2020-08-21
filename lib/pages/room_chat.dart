@@ -7,8 +7,13 @@ import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
 
 class RoomChat extends StatefulWidget {
-  RoomChat({@required this.name, @required this.uid, @required this.code, @required this.roomId
-  ,@required this.channelName, @required this.role});
+  RoomChat(
+      {@required this.name,
+      @required this.uid,
+      @required this.code,
+      @required this.roomId,
+      @required this.channelName,
+      @required this.role});
   final String name;
   final String uid;
   final String roomId;
@@ -102,7 +107,7 @@ class _RoomChatState extends State<RoomChat> {
 //    await AgoraRtcEngine.enableVideo();
     await AgoraRtcEngine.enableAudio();
     await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    await AgoraRtcEngine.setClientRole(allowSpeaker ? broadcaster : widget.role);
+    await AgoraRtcEngine.setClientRole(ClientRole.Audience);
   }
 
   /// Add agora event handlers
@@ -115,10 +120,10 @@ class _RoomChatState extends State<RoomChat> {
     };
 
     AgoraRtcEngine.onJoinChannelSuccess = (
-        String channel,
-        int uid,
-        int elapsed,
-        ) {
+      String channel,
+      int uid,
+      int elapsed,
+    ) {
       setState(() {
         final info = 'onJoinChannel: $channel, uid: $uid';
         _infoStrings.add(info);
@@ -386,7 +391,6 @@ class _RoomChatState extends State<RoomChat> {
               List<ListOfUsers> listUsers = [];
               List<ListOfUsers> micUsers = [];
 
-
               for (var user in users) {
                 final name = user['Name'];
                 final voiceRequest = user['voiceRequest'];
@@ -394,12 +398,13 @@ class _RoomChatState extends State<RoomChat> {
                 final userUid = user['Uid'];
                 final speakAllow = user['allowSpeak'];
 
-                if(userUid == widget.uid){
-//                  setState(() {
-//                    allowSpeak = speakAllow;
-//                  });
-                }
+                if (userUid == widget.uid) {
+                  AgoraRtcEngine.setClientRole(ClientRole.Audience).then((value) => print('done')).catchError((onError) => print("Error In Allow Speker: " + onError));
 
+                  // setState(() {
+                  //   allowSpeaker = speakAllow;
+                  // });
+                }
 
                 if (voiceRequest == true) {
                   micUsers.add(ListOfUsers(
@@ -457,7 +462,13 @@ class _RoomChatState extends State<RoomChat> {
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin, this.uid, this.allowSpeak});
+  ListOfUsers(
+      {this.name,
+      this.voiceRequest,
+      this.leading,
+      this.isAdmin,
+      this.uid,
+      this.allowSpeak});
   final String name;
   final String leading;
   final String uid;
@@ -471,12 +482,14 @@ class ListOfUsers extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            isAdmin ? Firestore.instance.collection('iraq')
-                .document('najaf').collection('users').document(uid).updateData({
-              'allowSpeak' : !allowSpeak
-            })
-                :
-            print('User Click');
+            isAdmin
+                ? Firestore.instance
+                    .collection('iraq')
+                    .document('najaf')
+                    .collection('users')
+                    .document(uid)
+                    .updateData({'allowSpeak': !allowSpeak})
+                : print('User Click');
           },
           child: ListTile(
             title: Text(
