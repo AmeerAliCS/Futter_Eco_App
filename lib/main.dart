@@ -141,7 +141,8 @@ class _MyAppState extends State<MyApp> {
 //    AgoraRtcEngine.enableDualStreamMode(true);
 //    AgoraRtcEngine.enableLocalAudio(true);
 //    // AgoraRtcEngine.setParameters('{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}');
-    AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
+    // AgoraRtcEngine.setClientRole(ClientRole.Audience);
 
 //
 //    VideoEncoderConfiguration config = VideoEncoderConfiguration();
