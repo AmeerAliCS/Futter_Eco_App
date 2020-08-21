@@ -107,7 +107,7 @@ class _RoomChatState extends State<RoomChat> {
 //    await AgoraRtcEngine.enableVideo();
     await AgoraRtcEngine.enableAudio();
     await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    await AgoraRtcEngine.setClientRole(ClientRole.Audience);
+//    await AgoraRtcEngine.setClientRole(ClientRole.Broadcaster);
   }
 
   /// Add agora event handlers
@@ -399,7 +399,7 @@ class _RoomChatState extends State<RoomChat> {
                 final speakAllow = user['allowSpeak'];
 
                 if (userUid == widget.uid) {
-                  AgoraRtcEngine.setClientRole(ClientRole.Broadcaster).then((value) => print('done')).catchError((onError) => print("Error In Allow Speker: " + onError));
+                  AgoraRtcEngine.setClientRole(speakAllow ? ClientRole.Broadcaster : ClientRole.Audience).then((value) => print('done')).catchError((onError) => print("Error In Allow Speker: " + onError));
 
                   // setState(() {
                   //   allowSpeaker = speakAllow;
