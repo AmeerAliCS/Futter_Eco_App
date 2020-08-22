@@ -451,6 +451,7 @@ class _RoomChatState extends State<RoomChat> {
                     uid: userUid,
                     allowSpeak: speakAllow,
                     isAdmin: isAdmin,
+                    changeAppBar: changeAppBar,
                   ));
                 } else {
                   listUsers.add(ListOfUsers(
@@ -460,6 +461,7 @@ class _RoomChatState extends State<RoomChat> {
                     isAdmin: isAdmin,
                     uid: userUid,
                     allowSpeak: speakAllow,
+                    changeAppBar: changeAppBar,
                   ));
                 }
               }
@@ -470,6 +472,12 @@ class _RoomChatState extends State<RoomChat> {
         ),
       ),
     );
+  }
+
+  changeAppBar(String name){
+    setState(() {
+      appBarTitle = name;
+    });
   }
 
   Future<void> _micFun() async {
@@ -505,7 +513,7 @@ class ListOfUsers extends StatelessWidget {
       this.leading,
       this.isAdmin,
       this.uid,
-      this.allowSpeak});
+      this.allowSpeak, this.changeAppBar});
 
   final String name;
   final String leading;
@@ -513,6 +521,7 @@ class ListOfUsers extends StatelessWidget {
   final bool allowSpeak;
   final bool voiceRequest;
   final bool isAdmin;
+  final Function changeAppBar;
 
   @override
   Widget build(BuildContext context) {
@@ -530,6 +539,7 @@ class ListOfUsers extends StatelessWidget {
                           SimpleDialogOption(
                             child: Text('كتم العضو'),
                             onPressed: () {
+                              changeAppBar('Chat Room');
                               Firestore.instance
                                   .collection('iraq')
                                   .document('najaf')
@@ -543,6 +553,7 @@ class ListOfUsers extends StatelessWidget {
                           SimpleDialogOption(
                             child: Text('الغاء الكتم'),
                             onPressed: () {
+                              changeAppBar(name);
                               Firestore.instance
                                   .collection('iraq')
                                   .document('najaf')
