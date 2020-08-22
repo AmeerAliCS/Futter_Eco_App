@@ -237,7 +237,7 @@ class _RoomChatState extends State<RoomChat> {
                       messageText: messageText,
                       messageSender: messageSender,
                       isMe: userUid == widget.uid,
-                      colour: textColor == '' ? Colors.black : textColor
+                      colour: textColor
                     );
                     messageWidgets.add(messageWidget);
                   }
