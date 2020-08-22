@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_app/components/colors_icon.dart';
 import 'package:eco_app/utils/settings.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
@@ -39,7 +40,7 @@ class _RoomChatState extends State<RoomChat> {
   bool voiceReqst = false;
   final _infoStrings = <String>[];
   bool muted = false;
-  static bool allowSpeaker = false;
+  static List<Color> _messageColors = [Colors.black, Colors.lightBlue, Colors.yellow, Colors.green, Colors.blue, Colors.red];
   ClientRole broadcaster = ClientRole.Broadcaster;
 
   List<AdminStruct> listOfAdmin = [];
@@ -152,6 +153,14 @@ class _RoomChatState extends State<RoomChat> {
     };
   }
 
+  Widget horizontalDivider() {
+    return Container(
+      width: .5,
+      height: 40,
+      color: Colors.grey,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,28 +168,38 @@ class _RoomChatState extends State<RoomChat> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.pinkAccent.shade100,
         title: Row(
-          children: [
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
             IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: Colors.white70,
-                  size: 30,
-                ),
-                onPressed: () {}),
-            IconButton(
-                icon: Icon(
-                  Icons.chat_bubble,
-                  color: Colors.yellowAccent,
-                  size: 30,
-                ),
-                onPressed: () {}),
-            SizedBox(
-              width: 30.0,
+              icon: Icon(
+                Icons.menu,
+                color: Colors.white70,
+                size: 30,
+              ),
+              onPressed: () => {},
             ),
-            Text('Room Chat'),
+            horizontalDivider(),
+            Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.chat_bubble,
+                    color: Colors.yellowAccent,
+                    size: 30,
+                  ),
+                  onPressed: () => {},
+                ),
+              ],
+            ),
+            Expanded(
+              child: Center(child: Text('Chat Room')),
+            )
           ],
         ),
         centerTitle: true,
+        titleSpacing: 0,
         actions: [
           IconButton(
             icon: Icon(
@@ -194,6 +213,7 @@ class _RoomChatState extends State<RoomChat> {
               });
             },
           ),
+          horizontalDivider(),
           IconButton(
             icon: Icon(
               Icons.group,
@@ -232,13 +252,13 @@ class _RoomChatState extends State<RoomChat> {
                     final messageText = message['text'];
                     final messageSender = message['sender'];
                     final userUid = message['uid'];
-                    final textColor = message['textColor'];
+                    final textColor = _messageColors[message['textColor']];
                     final messageWidget = MessageBubble(
-                      messageText: messageText,
-                      messageSender: messageSender,
-                      isMe: userUid == widget.uid,
-                      colour: textColor
-                    );
+                        messageText: messageText,
+                        messageSender: messageSender,
+                        isMe: userUid == widget.uid,
+                        color: textColor
+                        );
                     messageWidgets.add(messageWidget);
                   }
 
@@ -283,17 +303,14 @@ class _RoomChatState extends State<RoomChat> {
                           'sender': widget.name,
                           'uid': widget.uid,
                           'text': messageController.text,
+                          'textColor': 0, 
                           'date': DateTime.now()
                         });
                       }
                       messageController.clear();
                     },
                   ),
-                  Container(
-                    width: .5,
-                    height: 40,
-                    color: Colors.grey,
-                  ),
+                  horizontalDivider(),
                   IconButton(
                     icon: _showEmoji
                         ? Icon(Icons.keyboard)
@@ -316,11 +333,7 @@ class _RoomChatState extends State<RoomChat> {
                       }
                     },
                   ),
-                  Container(
-                    width: .5,
-                    height: 40,
-                    color: Colors.grey,
-                  ),
+                  horizontalDivider(),
                   Expanded(
                     child: Container(
                       margin: EdgeInsets.all(5.0),
@@ -346,11 +359,7 @@ class _RoomChatState extends State<RoomChat> {
                       ),
                     ),
                   ),
-                  Container(
-                    width: .5,
-                    height: 40,
-                    color: Colors.grey,
-                  ),
+                  horizontalDivider(),
                   IconButton(
                     icon: Icon(
                         voiceReqst
@@ -402,7 +411,12 @@ class _RoomChatState extends State<RoomChat> {
                 final speakAllow = user['allowSpeak'];
 
                 if (userUid == widget.uid) {
-                  AgoraRtcEngine.setClientRole(speakAllow ? ClientRole.Broadcaster : ClientRole.Audience).then((value) => print('done')).catchError((onError) => print("Error In Allow Speker: " + onError));
+                  AgoraRtcEngine.setClientRole(speakAllow
+                          ? ClientRole.Broadcaster
+                          : ClientRole.Audience)
+                      .then((value) => print('done'))
+                      .catchError((onError) =>
+                          print("Error In Allow Speker: " + onError));
 
                   // setState(() {
                   //   allowSpeaker = speakAllow;
@@ -465,7 +479,13 @@ class _RoomChatState extends State<RoomChat> {
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin, this.uid, this.allowSpeak});
+  ListOfUsers(
+      {this.name,
+      this.voiceRequest,
+      this.leading,
+      this.isAdmin,
+      this.uid,
+      this.allowSpeak});
 
   final String name;
   final String leading;
@@ -474,203 +494,168 @@ class ListOfUsers extends StatelessWidget {
   final bool voiceRequest;
   final bool isAdmin;
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         GestureDetector(
           onTap: () {
-            isAdmin ?
-             showDialog(context: context,
-                  builder: (BuildContext context) {
-                    return SimpleDialog(
-                      title: Text('Admin Options'),
-                      children: <Widget>[
-                         SimpleDialogOption(
-                          child: Text('كتم العضو') ,
-                          onPressed: (){
-                            Firestore.instance
-                                .collection('iraq')
-                                .document('najaf')
-                                .collection('users')
-                                .document(uid)
-                                .updateData({'allowSpeak': false}).then((_){
-                                  Navigator.of(context).pop();
-                            });
-                          },),
-                         SimpleDialogOption(child: Text('الغاء الكتم') ,
-                          onPressed: (){
-                            Firestore.instance
-                                .collection('iraq')
-                                .document('najaf')
-                                .collection('users')
-                                .document(uid)
-                                .updateData({'allowSpeak': true}).then((_){
-                              Navigator.of(context).pop();
-                            });
-                          },),
-                         SimpleDialogOption(
-                           child: Row(
-                             children: [
-
-                               ColorsIcon(
-                                 colour: Colors.red,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'red'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.blue,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'blue'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.green,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'green'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.yellow,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'yellow'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.purpleAccent,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'purpleAccent'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.deepPurple,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'deepPurple'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.pink,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'pink'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                               SizedBox(width: 5.0,),
-
-                               ColorsIcon(
-                                 colour: Colors.black54,
-                                 onTap: (){
-                                   Firestore.instance
-                                       .collection('iraq')
-                                       .document('najaf')
-                                       .collection('users')
-                                       .document(uid)
-                                       .updateData({
-                                     'textColor' : 'black54'
-                                   }).then((_){
-                                     Navigator.of(context).pop();
-                                   });
-                                 },
-                               ),
-
-                             ],
-                           ) ,
-                         ),
-                      ],
-                    );
-                  })
+            isAdmin
+                ? showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SimpleDialog(
+                        title: Text('قائمة الادمن'),
+                        children: <Widget>[
+                          SimpleDialogOption(
+                            child: Text('كتم العضو'),
+                            onPressed: () {
+                              Firestore.instance
+                                  .collection('iraq')
+                                  .document('najaf')
+                                  .collection('users')
+                                  .document(uid)
+                                  .updateData({'allowSpeak': false}).then((_) {
+                                Navigator.of(context).pop();
+                              });
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: Text('الغاء الكتم'),
+                            onPressed: () {
+                              Firestore.instance
+                                  .collection('iraq')
+                                  .document('najaf')
+                                  .collection('users')
+                                  .document(uid)
+                                  .updateData({'allowSpeak': true}).then((_) {
+                                Navigator.of(context).pop();
+                              });
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ColorsIcon(
+                                  colour: Colors.red,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData({'textColor': 5}).then(
+                                            (_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                ColorsIcon(
+                                  colour: Colors.blue,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData({'textColor': 4}).then(
+                                            (_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                ColorsIcon(
+                                  colour: Colors.green,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData(
+                                            {'textColor': 3}).then((_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                ColorsIcon(
+                                  colour: Colors.yellow,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData(
+                                            {'textColor': 2}).then((_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                ColorsIcon(
+                                  colour: Colors.lightBlue,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData({
+                                      'textColor': 1
+                                    }).then((_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                ColorsIcon(
+                                  colour: Colors.black,
+                                  onTap: () {
+                                    Firestore.instance
+                                        .collection('iraq')
+                                        .document('najaf')
+                                        .collection('users')
+                                        .document(uid)
+                                        .updateData(
+                                            {'textColor': 0}).then((_) {
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    })
                 : print('User Click');
           },
-          child: ListTile(
-            title: Text(
-              name,
-              style: TextStyle(fontSize: 20),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListTile(
+              dense: true,
+              title: Text(
+                name,
+                style: TextStyle(fontSize: 20),
+              ),
+              leading: Text(leading, textAlign: TextAlign.start),
+              trailing: Text(voiceRequest ? '✋' : ''),
             ),
-            leading: Text(leading),
-            trailing: Text(voiceRequest ? '✋' : ''),
           ),
         ),
         Divider(
@@ -682,12 +667,12 @@ class ListOfUsers extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.messageText, this.messageSender, this.isMe, this.colour});
+  MessageBubble({this.messageText, this.messageSender, this.isMe, this.color});
 
   final String messageText;
   final String messageSender;
   final bool isMe;
-  final String colour;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -730,7 +715,7 @@ class MessageBubble extends StatelessWidget {
               },
               child: Text(
                 messageText,
-                style: TextStyle(color: Colors.black, fontSize: 20.0),
+                style: TextStyle(color: color, fontSize: 20.0),
               ),
             ),
           ),
