@@ -1,5 +1,6 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eco_app/components/colors_icon.dart';
 import 'package:eco_app/utils/settings.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
@@ -231,10 +232,12 @@ class _RoomChatState extends State<RoomChat> {
                     final messageText = message['text'];
                     final messageSender = message['sender'];
                     final userUid = message['uid'];
+                    final textColor = message['textColor'];
                     final messageWidget = MessageBubble(
                       messageText: messageText,
                       messageSender: messageSender,
                       isMe: userUid == widget.uid,
+                      colour: textColor == '' ? Colors.black : textColor
                     );
                     messageWidgets.add(messageWidget);
                   }
@@ -462,13 +465,8 @@ class _RoomChatState extends State<RoomChat> {
 }
 
 class ListOfUsers extends StatelessWidget {
-  ListOfUsers(
-      {this.name,
-      this.voiceRequest,
-      this.leading,
-      this.isAdmin,
-      this.uid,
-      this.allowSpeak});
+  ListOfUsers({this.name, this.voiceRequest, this.leading, this.isAdmin, this.uid, this.allowSpeak});
+
   final String name;
   final String leading;
   final String uid;
@@ -476,19 +474,194 @@ class ListOfUsers extends StatelessWidget {
   final bool voiceRequest;
   final bool isAdmin;
 
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         GestureDetector(
           onTap: () {
-            isAdmin
-                ? Firestore.instance
-                    .collection('iraq')
-                    .document('najaf')
-                    .collection('users')
-                    .document(uid)
-                    .updateData({'allowSpeak': !allowSpeak})
+            isAdmin ?
+             showDialog(context: context,
+                  builder: (BuildContext context) {
+                    return SimpleDialog(
+                      title: Text('Admin Options'),
+                      children: <Widget>[
+                         SimpleDialogOption(
+                          child: Text('كتم العضو') ,
+                          onPressed: (){
+                            Firestore.instance
+                                .collection('iraq')
+                                .document('najaf')
+                                .collection('users')
+                                .document(uid)
+                                .updateData({'allowSpeak': false}).then((_){
+                                  Navigator.of(context).pop();
+                            });
+                          },),
+                         SimpleDialogOption(child: Text('الغاء الكتم') ,
+                          onPressed: (){
+                            Firestore.instance
+                                .collection('iraq')
+                                .document('najaf')
+                                .collection('users')
+                                .document(uid)
+                                .updateData({'allowSpeak': true}).then((_){
+                              Navigator.of(context).pop();
+                            });
+                          },),
+                         SimpleDialogOption(
+                           child: Row(
+                             children: [
+
+                               ColorsIcon(
+                                 colour: Colors.red,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'red'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.blue,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'blue'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.green,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'green'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.yellow,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'yellow'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.purpleAccent,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'purpleAccent'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.deepPurple,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'deepPurple'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.pink,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'pink'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                               SizedBox(width: 5.0,),
+
+                               ColorsIcon(
+                                 colour: Colors.black54,
+                                 onTap: (){
+                                   Firestore.instance
+                                       .collection('iraq')
+                                       .document('najaf')
+                                       .collection('users')
+                                       .document(uid)
+                                       .updateData({
+                                     'textColor' : 'black54'
+                                   }).then((_){
+                                     Navigator.of(context).pop();
+                                   });
+                                 },
+                               ),
+
+                             ],
+                           ) ,
+                         ),
+                      ],
+                    );
+                  })
                 : print('User Click');
           },
           child: ListTile(
@@ -509,11 +682,12 @@ class ListOfUsers extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.messageText, this.messageSender, this.isMe});
+  MessageBubble({this.messageText, this.messageSender, this.isMe, this.colour});
 
   final String messageText;
   final String messageSender;
   final bool isMe;
+  final String colour;
 
   @override
   Widget build(BuildContext context) {

@@ -240,7 +240,7 @@ class _HomeRoomsState extends State<HomeRooms> {
   }
 
   createUserInsideRoom(String uid) async {
-    await Firestore.instance.collection('iraq').document('najaf').collection('users').document(uid).setData({
+    await Firestore.instance.collection('iraq').document('najaf').collection('users').document(uid).updateData({
       'Name' : _nameController.text,
       'Uid' : uid,
       'voiceRequest' : false,
