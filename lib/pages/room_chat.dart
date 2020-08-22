@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eco_app/components/colors_icon.dart';
 import 'package:eco_app/utils/settings.dart';
 import 'package:emoji_picker/emoji_picker.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
@@ -40,7 +39,14 @@ class _RoomChatState extends State<RoomChat> {
   bool voiceReqst = false;
   final _infoStrings = <String>[];
   bool muted = false;
-  static List<Color> _messageColors = [Colors.black, Colors.lightBlue, Colors.yellow, Colors.green, Colors.blue, Colors.red];
+  static List<Color> _messageColors = [
+    Colors.black,
+    Colors.lightBlue,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.red
+  ];
   ClientRole broadcaster = ClientRole.Broadcaster;
 
   List<AdminStruct> listOfAdmin = [];
@@ -153,6 +159,32 @@ class _RoomChatState extends State<RoomChat> {
     };
   }
 
+  Future<void> _sendMessage() async {
+    if (messageController.text.isNotEmpty) {
+      Firestore.instance
+          .collection('iraq')
+          .document('najaf')
+          .collection('users')
+          .where('Uid', isEqualTo: widget.uid)
+          .getDocuments()
+          .then((value) {
+        Firestore.instance
+            .collection('iraq')
+            .document('najaf')
+            .collection('messages')
+            .document()
+            .setData({
+          'sender': widget.name,
+          'uid': widget.uid,
+          'text': messageController.text,
+          'textColor': value.documents.first['textColor'],
+          'date': DateTime.now()
+        });
+        messageController.clear();
+      });
+    }
+  }
+
   Widget horizontalDivider() {
     return Container(
       width: .5,
@@ -249,16 +281,17 @@ class _RoomChatState extends State<RoomChat> {
                   final messages = snapshot.data.documents.reversed;
                   List<MessageBubble> messageWidgets = [];
                   for (var message in messages) {
-                    final messageText = message['text'];
-                    final messageSender = message['sender'];
-                    final userUid = message['uid'];
-                    final textColor = _messageColors[message['textColor']];
+                    final String messageText = message['text'];
+                    final String messageSender = message['sender'];
+                    //final String date = "${message['date']}";
+                    final String userUid = message['uid'];
+                    final Color textColor = _messageColors[message['textColor']];
                     final messageWidget = MessageBubble(
                         messageText: messageText,
                         messageSender: messageSender,
+                        time: '12:00AM',
                         isMe: userUid == widget.uid,
-                        color: textColor
-                        );
+                        color: textColor);
                     messageWidgets.add(messageWidget);
                   }
 
@@ -292,23 +325,7 @@ class _RoomChatState extends State<RoomChat> {
                   IconButton(
                     icon: Icon(Icons.arrow_upward,
                         color: Colors.greenAccent, size: 30.0),
-                    onPressed: () {
-                      if (messageController.text.isNotEmpty) {
-                        Firestore.instance
-                            .collection('iraq')
-                            .document('najaf')
-                            .collection('messages')
-                            .document()
-                            .setData({
-                          'sender': widget.name,
-                          'uid': widget.uid,
-                          'text': messageController.text,
-                          'textColor': 0, 
-                          'date': DateTime.now()
-                        });
-                      }
-                      messageController.clear();
-                    },
+                    onPressed: _sendMessage,
                   ),
                   horizontalDivider(),
                   IconButton(
@@ -545,8 +562,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData({'textColor': 5}).then(
-                                            (_) {
+                                        .updateData({'textColor': 5}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -562,8 +578,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData({'textColor': 4}).then(
-                                            (_) {
+                                        .updateData({'textColor': 4}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -579,8 +594,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData(
-                                            {'textColor': 3}).then((_) {
+                                        .updateData({'textColor': 3}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -596,8 +610,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData(
-                                            {'textColor': 2}).then((_) {
+                                        .updateData({'textColor': 2}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -613,9 +626,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData({
-                                      'textColor': 1
-                                    }).then((_) {
+                                        .updateData({'textColor': 1}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -631,8 +642,7 @@ class ListOfUsers extends StatelessWidget {
                                         .document('najaf')
                                         .collection('users')
                                         .document(uid)
-                                        .updateData(
-                                            {'textColor': 0}).then((_) {
+                                        .updateData({'textColor': 0}).then((_) {
                                       Navigator.of(context).pop();
                                     });
                                   },
@@ -667,10 +677,11 @@ class ListOfUsers extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.messageText, this.messageSender, this.isMe, this.color});
+  MessageBubble({this.messageText, this.messageSender, this.time,this.isMe, this.color});
 
   final String messageText;
   final String messageSender;
+  final String time;
   final bool isMe;
   final Color color;
 
@@ -686,7 +697,7 @@ class MessageBubble extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
-                child: Text("12:00AM"),
+                child: Text(time),
               ),
               SizedBox(
                 height: 5.0,
