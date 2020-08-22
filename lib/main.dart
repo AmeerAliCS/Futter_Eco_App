@@ -6,14 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void main() => runApp(MaterialApp(localizationsDelegates: [
+void main() => runApp(MaterialApp(
+    localizationsDelegates: [
       // ... app-specific localization delegate[s] here
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ], supportedLocales: [
       const Locale('ar', 'AE')
-    ], debugShowCheckedModeBanner: false, home: HomeRooms()));
+    ],
+    debugShowCheckedModeBanner: false,
+    home: HomeRooms())
+);
 
 
 

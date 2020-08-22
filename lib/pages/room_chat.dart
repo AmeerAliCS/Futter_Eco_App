@@ -6,6 +6,7 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:time/time.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class RoomChat extends StatefulWidget {
   RoomChat(
@@ -285,11 +286,12 @@ class _RoomChatState extends State<RoomChat> {
                     final String messageSender = message['sender'];
                     //final String date = "${message['date']}";
                     final String userUid = message['uid'];
+                    final Timestamp timestamp = message['date'];
                     final Color textColor = _messageColors[message['textColor']];
                     final messageWidget = MessageBubble(
                         messageText: messageText,
                         messageSender: messageSender,
-                        time: '12:00AM',
+                        time: timestamp,
                         isMe: userUid == widget.uid,
                         color: textColor);
                     messageWidgets.add(messageWidget);
@@ -681,7 +683,7 @@ class MessageBubble extends StatelessWidget {
 
   final String messageText;
   final String messageSender;
-  final String time;
+  final Timestamp time;
   final bool isMe;
   final Color color;
 
@@ -697,7 +699,7 @@ class MessageBubble extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(time),
+                child: Text(timeago.format(time.toDate()) , overflow: TextOverflow.ellipsis),
               ),
               SizedBox(
                 height: 5.0,
