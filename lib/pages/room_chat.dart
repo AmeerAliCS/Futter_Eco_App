@@ -40,6 +40,7 @@ class _RoomChatState extends State<RoomChat> {
   bool voiceReqst = false;
   final _infoStrings = <String>[];
   bool muted = false;
+  String appBarTitle = 'Chat Room';
   static List<Color> _messageColors = [
     Colors.black,
     Colors.lightBlue,
@@ -227,7 +228,7 @@ class _RoomChatState extends State<RoomChat> {
               ],
             ),
             Expanded(
-              child: Center(child: Text('Chat Room')),
+              child: Center(child: Text(appBarTitle)),
             )
           ],
         ),
